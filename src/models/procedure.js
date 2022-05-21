@@ -20,7 +20,9 @@ module.exports = (sequelize, DataTypes) => {
   procedure.init({
     userId: DataTypes.INTEGER,
     tramiterId: DataTypes.INTEGER,
+    // 0 = waiting, 1 = in progress, 2 = done, 3 = paid.
     status: DataTypes.INTEGER,
+    // 0 = technical revision, 1 = circulation paper.
     type: DataTypes.INTEGER,
     comments: DataTypes.STRING,
     price: DataTypes.INTEGER,
