@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     procedureId: DataTypes.INTEGER,
     date: DataTypes.DATEONLY,
     price: DataTypes.INTEGER,
+    // 0 = not paid, 1 = paid.
     status: DataTypes.INTEGER,
   }, {
     sequelize,
