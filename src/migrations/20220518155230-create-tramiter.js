@@ -18,6 +18,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       approved: {
+        defaultValue: false,
         type: Sequelize.BOOLEAN,
       },
       email: {
