@@ -8,12 +8,14 @@ const index = require('./routes/index');
 const auth = require('./routes/auth');
 const users = require('./routes/users');
 const tramiters = require('./routes/tramiters');
+const debts = require('./routes/debt');
 
 const router = new KoaRouter();
 
 // unprotected routes
 router.use('/', index.routes());
 router.use('/auth', auth.routes());
+router.use('/debts', debts.routes());
 
 // protected routes
 router.use(jwt({ secret: process.env.JWT_SECRET, key: 'authData' }));
