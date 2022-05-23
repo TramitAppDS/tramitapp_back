@@ -55,7 +55,7 @@ router.post('api.auth.login.user', '/login/user', async (ctx) => {
   }
 });
 
-router.post('users.register', '/register/user', async (ctx) => {
+router.post('users.register.user', '/register/user', async (ctx) => {
   try {
     const {
       firstName, lastName, phone, email, password,
@@ -69,12 +69,12 @@ router.post('users.register', '/register/user', async (ctx) => {
   }
 });
 
-router.post('users.register', '/register/tramiter', async (ctx) => {
+router.post('users.register.tramiter', '/register/tramiter', async (ctx) => {
   try {
     const {
       firstName, lastName, phone, email, password, city, commune,
     } = ctx.request.body;
-    await ctx.orm.user.create({
+    await ctx.orm.tramiter.create({
       firstName, lastName, phone, email, password, city, commune,
     });
     ctx.status = 201;

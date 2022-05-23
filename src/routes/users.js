@@ -42,7 +42,7 @@ router.patch('users.patch', '/:id', async (ctx) => {
   const newInfo = ctx.request.body;
   try {
     if (ctx.state.currentUser.id === Number(ctx.params.id)) {
-      const user = ctx.state.currentUser;
+      const user = await ctx.orm.user.findByPk(Number(ctx.params.id));
       if (await valPassUser(newInfo, ctx)) {
         await user.update(newInfo);
         ctx.body = { success: true };

@@ -41,8 +41,8 @@ router.get('tramiters.show.one', '/:id', async (ctx) => {
 router.patch('tramiters.patch', '/:id', async (ctx) => {
   const newInfo = ctx.request.body;
   try {
-    if (ctx.state.currenttramiter.id === Number(ctx.params.id)) {
-      const tramiter = ctx.state.currenttramiter;
+    if (ctx.state.currentTramiter.id === Number(ctx.params.id)) {
+      const tramiter = await ctx.orm.tramiter.findByPk(Number(ctx.params.id));
       if (await valPassTramiter(newInfo, ctx)) {
         await tramiter.update(newInfo);
         ctx.body = { success: true };
@@ -65,7 +65,7 @@ router.patch('tramiters.patch', '/:id', async (ctx) => {
 router.delete('api.tramiter.delete', '/:id', async (ctx) => {
   try {
     const tramiter = await ctx.orm.tramiter.findByPk(ctx.params.id);
-    if (Number(ctx.state.currenttramiter.id) === Number(ctx.params.id)) {
+    if (Number(ctx.state.currentTramiter.id) === Number(ctx.params.id)) {
       if (tramiter) {
         await tramiter.destroy();
         ctx.body = { success: true };
