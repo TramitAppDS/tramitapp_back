@@ -9,6 +9,8 @@ const auth = require('./routes/auth');
 const users = require('./routes/users');
 const tramiters = require('./routes/tramiters');
 const procedures = require('./routes/procedures');
+const debts = require('./routes/debt');
+const gains = require('./routes/gain');
 
 const router = new KoaRouter();
 
@@ -24,6 +26,8 @@ router.use(apiSetCurrentTramiter);
 router.use('/hello', hello.routes());
 router.use('/users', users.routes());
 router.use('/tramiters', tramiters.routes());
+router.use('/gains', gains.routes());
 router.use('/procedures', procedures.routes());
+router.use('/debts', debts.routes());
 
 module.exports = router;
