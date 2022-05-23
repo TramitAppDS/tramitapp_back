@@ -18,6 +18,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       admin: {
+        defaultValue: false,
         type: Sequelize.BOOLEAN,
       },
       email: {

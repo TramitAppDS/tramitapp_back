@@ -9,7 +9,7 @@ async function apiSetCurrentUser(ctx, next) {
 async function apiSetCurrentTramiter(ctx, next) {
   const { authData } = ctx.state;
   if (authData) {
-    ctx.state.currentUser = await ctx.orm.tramiter.findByPk(authData.sub);
+    ctx.state.currentTramiter = await ctx.orm.tramiter.findByPk(authData.sub);
   }
   return next();
 }

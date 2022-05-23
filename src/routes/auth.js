@@ -5,7 +5,7 @@ const { generateToken } = require('../helpers/auth');
 
 const router = new KoaRouter();
 
-router.post('api.auth.login.tramiter', '/tramiter', async (ctx) => {
+router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
   const { email, password } = ctx.request.body;
   const tramiter = await ctx.orm.tramiter.findOne({ where: { email } });
   if (!tramiter) ctx.throw(404, `No user found with ${email}`);
@@ -32,7 +32,7 @@ router.post('api.auth.login.tramiter', '/tramiter', async (ctx) => {
   }
 });
 
-router.post('api.auth.login.user', '/user', async (ctx) => {
+router.post('api.auth.login.user', '/login/user', async (ctx) => {
   const { email, password } = ctx.request.body;
   const user = await ctx.orm.user.findOne({ where: { email } });
   if (!user) ctx.throw(404, `No user found with ${email}`);
@@ -52,6 +52,34 @@ router.post('api.auth.login.user', '/user', async (ctx) => {
     };
   } catch (error) {
     ctx.throw(500);
+  }
+});
+
+router.post('users.register.user', '/register/user', async (ctx) => {
+  try {
+    const {
+      firstName, lastName, phone, email, password,
+    } = ctx.request.body;
+    await ctx.orm.user.create({
+      firstName, lastName, phone, email, password,
+    });
+    ctx.status = 201;
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.post('users.register.tramiter', '/register/tramiter', async (ctx) => {
+  try {
+    const {
+      firstName, lastName, phone, email, password, city, commune,
+    } = ctx.request.body;
+    await ctx.orm.tramiter.create({
+      firstName, lastName, phone, email, password, city, commune,
+    });
+    ctx.status = 201;
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
   }
 });
 
