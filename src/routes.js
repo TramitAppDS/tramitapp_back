@@ -8,6 +8,7 @@ const index = require('./routes/index');
 const auth = require('./routes/auth');
 const users = require('./routes/users');
 const tramiters = require('./routes/tramiters');
+const debts = require('./routes/debt');
 const gains = require('./routes/gain');
 const procedures = require('./routes/procedure');
 
@@ -27,5 +28,6 @@ router.use('/users', users.routes());
 router.use('/tramiters', tramiters.routes());
 router.use('/gains', gains.routes());
 router.use('/procedures', procedures.routes());
+router.use('/debts', debts.routes());
 
 module.exports = router;
