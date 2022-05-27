@@ -1,5 +1,6 @@
 require('dotenv').config();
 const KoaRouter = require('koa-router');
+const { condition } = require('sequelize');
 
 const { generateToken } = require('../helpers/auth');
 
@@ -34,6 +35,7 @@ router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
 
 router.post('api.auth.login.user', '/login/user', async (ctx) => {
   const { email, password } = ctx.request.body;
+  console.log(email)
   const user = await ctx.orm.user.findOne({ where: { email } });
   if (!user) ctx.throw(404, `No user found with ${email}`);
   const authenticated = await user.checkPassword(password);
