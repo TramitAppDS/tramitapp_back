@@ -22,7 +22,7 @@ module.exports = {
       lastName: 'Achondo',
       phone: '+56992333382',
       admin: false,
-      email: 'gachondoj@uc.cl',
+      email: 'guillermo.achondo@uc.cl',
       password: await bcrypt.hash('Hola123', PASSWORD_SALT_ROUNDS),
       createdAt: new Date(),
       updatedAt: new Date(),
