@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     city: DataTypes.STRING,
     commune: DataTypes.STRING,
+    rating: DataTypes.FLOAT,
   }, {
     sequelize,
     modelName: 'tramiter',

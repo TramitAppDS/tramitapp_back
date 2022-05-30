@@ -14,6 +14,18 @@ module.exports = {
       updatedAt: new Date(),
     });
 
+    seedsArray.push({
+      userId: 1,
+      tramiterId: null,
+      status: 2,
+      type: 3,
+      comments: 'Muy buen servicio',
+      price: 20000,
+      rating: 4.5,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
     return queryInterface.bulkInsert('procedures', seedsArray);
   },
 
