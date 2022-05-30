@@ -72,6 +72,48 @@ router.post('procedures.post', '/', async (ctx) => {
   }
 });
 
+router.patch('accept.procedure', '/accept/:id', async (ctx) => {
+  try {
+    const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
+    if (!procedure) {
+      ctx.throw(404);
+    }
+    if (procedure.tramiterId !== null) {
+      ctx.throw(403);
+    }
+    if (ctx.state.currentTramiter) {
+      await procedure.update({ tramiterId: ctx.state.currentTramiter.id });
+      await procedure.update({ status: 1 });
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com ',
+        service: 'gmail',
+        auth: {
+          user: process.env.MAIL,
+          pass: process.env.MAIL_PASSWORD,
+        },
+      });
+      const user = await ctx.orm.user.findByPk(procedure.userId);
+      const mailOptions = {
+        from: process.env.MAIL,
+        to: user.email,
+        subject: 'Mail de tramite aceptado',
+        text: `Su tramite ha sido aceptado y esta siendo realizado por ${ctx.state.currentTramiter.firstName}.`,
+      };
+      transporter.sendMail(mailOptions);
+      ctx.body = { success: true };
+      ctx.status = 200;
+    } else {
+      ctx.throw(401);
+    }
+  } catch (ValidationError) {
+    ctx.body = {
+      success: false,
+      message: ValidationError.message,
+    };
+    ctx.status = ValidationError.status;
+  }
+});
+
 router.patch('close.procedure', '/close/:id', async (ctx) => {
   try {
     const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
