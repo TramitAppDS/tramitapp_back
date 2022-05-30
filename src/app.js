@@ -7,6 +7,7 @@ const koaStatic = require('koa-static');
 const render = require('koa-ejs');
 const session = require('koa-session');
 const override = require('koa-override-method');
+const cors = require('@koa/cors');
 const assets = require('./assets');
 const mailer = require('./mailers');
 const routes = require('./routes');
@@ -14,6 +15,8 @@ const orm = require('./models');
 
 // App constructor
 const app = new Koa();
+
+app.use(cors());
 
 const developmentMode = app.env === 'development';
 const testMode = app.env === 'test';
