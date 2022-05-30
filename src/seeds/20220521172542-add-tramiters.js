@@ -15,6 +15,7 @@ module.exports = {
       password: await bcrypt.hash('Hola123', PASSWORD_SALT_ROUNDS),
       city: 'Santiago',
       commune: 'Lo Barnechea',
+      rating: 4.6,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -27,6 +28,7 @@ module.exports = {
       email: 'gachondoj@uc.cl',
       city: 'Santiago',
       commune: 'Vitacura',
+      rating: 4.1,
       password: await bcrypt.hash('Hola123', PASSWORD_SALT_ROUNDS),
       createdAt: new Date(),
       updatedAt: new Date(),

@@ -31,6 +31,36 @@ router.get('procedures.show.one', '/:id', async (ctx) => {
   }
 });
 
+router.get('users.show.user.procedure', '/user/:uid', async (ctx) => {
+  try {
+    const procedures = await ctx.orm.procedure.findAll({
+      where: { userId: ctx.params.uid },
+    });
+    if (!procedures) {
+      ctx.throw(404);
+    } else {
+      ctx.body = procedures;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.get('users.show.no.user.procedure', '/tramiter/null', async (ctx) => {
+  try {
+    const procedures = await ctx.orm.procedure.findAll({
+      where: { tramiterId: null },
+    });
+    if (!procedures) {
+      ctx.throw(404);
+    } else {
+      ctx.body = procedures;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
 router.patch('procedures.patch', '/:id', async (ctx) => {
   const newInfo = ctx.request.body;
   try {
@@ -161,6 +191,35 @@ router.patch('close.procedure', '/close/:id', async (ctx) => {
       success: false,
       message: ValidationError.message,
     };
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.patch('procedures.rating', '/rating/:id', async (ctx) => {
+  try {
+    const {
+      rating,
+    } = ctx.request.body;
+    const procedure = await ctx.orm.procedure.findByPk(ctx.params.id);
+    await procedure.update({
+      rating,
+    });
+    const tramiter = await ctx.orm.tramiter.findByPk(Number(procedure.tramiterId), {
+      include:
+      {
+        association: ctx.orm.tramiter.procedures,
+        as: 'procedures',
+      },
+    });
+    let count = 0;
+    let total = 0;
+    tramiter.procedures.forEach((e) => {
+      count += 1;
+      total += e.rating;
+    });
+    await tramiter.update({ rating: (total / count) });
+    ctx.status = 200;
+  } catch (ValidationError) {
     ctx.status = ValidationError.status;
   }
 });

@@ -28,6 +28,9 @@ module.exports = {
       password: {
         type: Sequelize.STRING,
       },
+      rating: {
+        type: Sequelize.FLOAT,
+      },
       city: {
         type: Sequelize.STRING,
       },
