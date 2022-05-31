@@ -1,6 +1,5 @@
 require('dotenv').config();
 const KoaRouter = require('koa-router');
-const { condition } = require('sequelize');
 
 const { generateToken } = require('../helpers/auth');
 
@@ -20,8 +19,12 @@ router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
       firstName: tramiter.firstName,
       lastName: tramiter.lastName,
       id: tramiter.id,
+      phone: tramiter.phone,
       email,
       aproved: tramiter.approved,
+      rating: tramiter.rating,
+      city: tramiter.city,
+      commune: tramiter.commune,
     };
     ctx.body = {
       ...toSendTramiter,
@@ -35,7 +38,6 @@ router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
 
 router.post('api.auth.login.user', '/login/user', async (ctx) => {
   const { email, password } = ctx.request.body;
-  console.log(email)
   const user = await ctx.orm.user.findOne({ where: { email } });
   if (!user) ctx.throw(404, `No user found with ${email}`);
   const authenticated = await user.checkPassword(password);
@@ -45,7 +47,12 @@ router.post('api.auth.login.user', '/login/user', async (ctx) => {
     // follow OAuth RFC6749 response standart
     // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
     const toSendUser = {
-      firstName: user.firstName, lastName: user.lastName, id: user.id, email, admin: user.admin,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      id: user.id,
+      email,
+      admin: user.admin,
+      phone: user.phone,
     };
     ctx.body = {
       ...toSendUser,

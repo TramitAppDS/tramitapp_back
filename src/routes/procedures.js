@@ -46,6 +46,21 @@ router.get('users.show.user.procedure', '/user/:uid', async (ctx) => {
   }
 });
 
+router.get('users.show.tramiter.procedure', '/tramiter/:uid', async (ctx) => {
+  try {
+    const procedures = await ctx.orm.procedure.findAll({
+      where: { tramiterId: ctx.params.uid },
+    });
+    if (!procedures) {
+      ctx.throw(404);
+    } else {
+      ctx.body = procedures;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
 router.get('users.show.no.user.procedure', '/tramiter/null', async (ctx) => {
   try {
     const procedures = await ctx.orm.procedure.findAll({
