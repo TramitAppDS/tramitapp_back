@@ -61,7 +61,7 @@ router.get('users.show.tramiter.procedure', '/tramiter/:uid', async (ctx) => {
   }
 });
 
-router.get('users.show.no.user.procedure', '/tramiter/null', async (ctx) => {
+router.get('users.show.no.user.procedure', '/null/tramiter', async (ctx) => {
   try {
     const procedures = await ctx.orm.procedure.findAll({
       where: { tramiterId: null },
