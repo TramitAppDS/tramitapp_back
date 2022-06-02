@@ -175,6 +175,12 @@ describe('gain API routes', () => {
       price: 1234567,
       status: 1,
     };
+    const gainInvalidData2 = {
+      procedureId: 1,
+      date: Date.parse('2022-05-29'),
+      price: 'precio',
+      status: 'status',
+    };
 
     const authorizedPostAuthor = (body) => request
       .post('/gains')
@@ -186,7 +192,7 @@ describe('gain API routes', () => {
       .set('Content-type', 'application/json')
       .send(body);
 
-    describe('local data is valid', () => {
+    describe('gain data is valid', () => {
       beforeAll(async () => {
         response = await authorizedPostAuthor(gainData2);
       });
@@ -208,6 +214,24 @@ describe('gain API routes', () => {
         const gainPosted = await app.context.orm.gain.findOne({ where: { date } });
         expect(gainPosted.price).toEqual(gainData2.price);
         expect(gainPosted.status).toEqual(gainData2.status);
+      });
+    });
+
+    describe('gain data is invalid', () => {
+      beforeAll(async () => {
+        response = await authorizedPostAuthor(gainInvalidData2);
+      });
+
+      test('responds with 500 (internal error) status code', () => {
+        expect(response.status).toBe(500);
+      });
+
+      test('responds with a text plain type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response text returns created', () => {
+        expect(response.text).toEqual('Internal Server Error');
       });
     });
 
@@ -270,6 +294,30 @@ describe('gain API routes', () => {
 
       test('response body matches returns success true', () => {
         expect(response.body).toEqual({ success: true });
+      });
+    });
+
+    describe('gain data is invalid', () => {
+      let response;
+      const newGainData = {
+        price: 'precio',
+        status: 'status',
+      };
+
+      beforeAll(async () => {
+        response = await authorizedPatchLocal(gain.id, newGainData);
+      });
+
+      test('responds with 500 (internal error) status code', () => {
+        expect(response.status).toBe(500);
+      });
+
+      test('responds with a text plain type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.text).toEqual('Internal Server Error');
       });
     });
 
