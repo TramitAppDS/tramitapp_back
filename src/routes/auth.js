@@ -1,6 +1,5 @@
 require('dotenv').config();
 const KoaRouter = require('koa-router');
-const { condition } = require('sequelize');
 
 const { generateToken } = require('../helpers/auth');
 
