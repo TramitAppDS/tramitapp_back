@@ -37,6 +37,22 @@ module.exports = {
       commune: {
         type: Sequelize.STRING,
       },
+      bank: {
+        defaultValue: null,
+        type: Sequelize.STRING,
+      },
+      accountType: {
+        defaultValue: null,
+        type: Sequelize.STRING,
+      },
+      rut: {
+        defaultValue: null,
+        type: Sequelize.STRING,
+      },
+      accountNumber: {
+        defaultValue: null,
+        type: Sequelize.STRING,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -8,9 +8,10 @@ const router = new KoaRouter();
 router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
   const { email, password } = ctx.request.body;
   const tramiter = await ctx.orm.tramiter.findOne({ where: { email } });
-  if (!tramiter) ctx.throw(404, `No user found with ${email}`);
+  if (!tramiter) ctx.throw(404, `No hay tramiter con el mail: ${email}`);
   const authenticated = await tramiter.checkPassword(password);
-  if (!authenticated) ctx.throw(401, 'Invalid password');
+  if (!authenticated) ctx.throw(401, 'Contraseña invalida');
+  if (tramiter.approved === false) { ctx.throw(401, 'No estas aprobado'); }
   try {
     const token = await generateToken(tramiter);
     // follow OAuth RFC6749 response standart
@@ -25,6 +26,10 @@ router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
       rating: tramiter.rating,
       city: tramiter.city,
       commune: tramiter.commune,
+      bank: tramiter.bank,
+      accountType: tramiter.accountType,
+      accountNumber: tramiter.accountNumber,
+      rut: tramiter.rut,
     };
     ctx.body = {
       ...toSendTramiter,
@@ -39,9 +44,9 @@ router.post('api.auth.login.tramiter', '/login/tramiter', async (ctx) => {
 router.post('api.auth.login.user', '/login/user', async (ctx) => {
   const { email, password } = ctx.request.body;
   const user = await ctx.orm.user.findOne({ where: { email } });
-  if (!user) ctx.throw(404, `No user found with ${email}`);
+  if (!user) ctx.throw(404, `No hay usuario para el mail: ${email}`);
   const authenticated = await user.checkPassword(password);
-  if (!authenticated) ctx.throw(401, 'Invalid password');
+  if (!authenticated) ctx.throw(401, 'Contraseña invalida');
   try {
     const token = await generateToken(user);
     // follow OAuth RFC6749 response standart

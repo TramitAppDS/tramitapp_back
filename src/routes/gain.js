@@ -70,4 +70,27 @@ router.post('gain.post', '/', async (ctx) => {
   }
 });
 
+router.patch('gain.paid', '/procedure/:pid', async (ctx) => {
+  try {
+    const gain = await ctx.orm.gain.findOne({ where: { procedureId: ctx.params.pid } });
+    const debt = await ctx.orm.debt.findOne({ where: { procedureId: ctx.params.pid } });
+    const procedure = await ctx.orm.procedure.findByPk(ctx.params.pid);
+    if (gain) {
+      if (ctx.state.currentUser.id === procedure.userId) {
+        await gain.update({ status: 1 });
+        if (debt.status === 1) {
+          await procedure.update({ status: 3 });
+        }
+        ctx.status = 200;
+      } else {
+        ctx.throw(401);
+      }
+    } else {
+      ctx.throw(404);
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
 module.exports = router;

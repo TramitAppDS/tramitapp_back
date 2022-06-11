@@ -106,10 +106,10 @@ router.delete('procedure.delete', '/:id', async (ctx) => {
 router.post('procedures.post', '/', async (ctx) => {
   try {
     const {
-      userId, tramiterId, status, type, comments, price, rating,
+      userId, tramiterId, status, address, plate, comments, price, rating,
     } = ctx.request.body;
     await ctx.orm.procedure.create({
-      userId, tramiterId, status, type, comments, price, rating,
+      userId, tramiterId, status, comments, price, rating, address, plate,
     });
     ctx.status = 201;
   } catch (ValidationError) {
@@ -234,6 +234,24 @@ router.patch('procedures.rating', '/rating/:id', async (ctx) => {
     });
     await tramiter.update({ rating: (total / count) });
     ctx.status = 200;
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.patch('procedures.patch.advance', '/advance/:id', async (ctx) => {
+  try {
+    const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
+    if (procedure) {
+      if (procedure.status < 2) {
+        await procedure.update({ status: procedure.status + 1 });
+        ctx.status = 200;
+      } else {
+        ctx.throw(400);
+      }
+    } else {
+      ctx.throw(404);
+    }
   } catch (ValidationError) {
     ctx.status = ValidationError.status;
   }

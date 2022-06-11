@@ -3,11 +3,12 @@ module.exports = {
     const seedsArray = [];
 
     seedsArray.push({
-      userId: 2,
+      userId: 1,
       tramiterId: 1,
       status: 2,
-      type: 0,
       comments: 'Muy buen servicio',
+      address: 'pdte. Errazuriz 1234',
+      plate: 'HVGF75',
       price: 20000,
       rating: 4.5,
       createdAt: new Date(),
@@ -18,8 +19,9 @@ module.exports = {
       userId: 1,
       tramiterId: null,
       status: 0,
-      type: 1,
       comments: null,
+      plate: 'BCDF78',
+      address: 'pdte. Errazuriz 1984',
       price: 20000,
       rating: null,
       createdAt: new Date(),

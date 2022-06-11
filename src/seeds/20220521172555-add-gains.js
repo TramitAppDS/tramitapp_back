@@ -6,7 +6,7 @@ module.exports = {
       procedureId: 1,
       date: new Date(),
       price: 20000,
-      status: 1,
+      status: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
