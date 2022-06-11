@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
     city: DataTypes.STRING,
     commune: DataTypes.STRING,
     rating: DataTypes.FLOAT,
+    bank: DataTypes.STRING,
+    accountType: DataTypes.STRING,
+    rut: DataTypes.STRING,
+    accountNumber: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'tramiter',
