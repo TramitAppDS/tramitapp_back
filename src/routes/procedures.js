@@ -31,6 +31,32 @@ router.get('procedures.show.one', '/:id', async (ctx) => {
   }
 });
 
+router.get('procedures.show.gain', '/gain/:id', async (ctx) => {
+  try {
+    const gain = await ctx.orm.gain.findOne({ where: { procedureId: ctx.params.id } });
+    if (!gain) {
+      ctx.throw(404);
+    } else {
+      ctx.body = gain;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.get('procedures.show.debt', '/debt/:id', async (ctx) => {
+  try {
+    const debt = await ctx.orm.debt.findOne({ where: { procedureId: ctx.params.id } });
+    if (!debt) {
+      ctx.throw(404);
+    } else {
+      ctx.body = debt;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
 router.get('users.show.user.procedure', '/user/:uid', async (ctx) => {
   try {
     const procedures = await ctx.orm.procedure.findAll({
