@@ -261,7 +261,6 @@ router.patch('procedures.patch.cancel', '/cancel/:id', async (ctx) => {
   try {
     const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
     if (procedure) {
-      console.log(procedure.status, 1, ctx.state.currentTramiter, procedure.tramiterId);
       if (procedure.status <= 1 && ctx.state.currentTramiter.id === procedure.tramiterId) {
         await procedure.update({ tramiterId: null });
         ctx.body = { success: true };
