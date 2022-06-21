@@ -74,10 +74,15 @@ router.post('users.register.user', '/register/user', async (ctx) => {
     const {
       firstName, lastName, phone, email, password,
     } = ctx.request.body;
-    await ctx.orm.user.create({
-      firstName, lastName, phone, email, password,
-    });
-    ctx.status = 201;
+    const user = await ctx.orm.user.findOne({ where: { email } });
+    if (user) {
+      ctx.throw(401, 'Email ya esta siendo utilizado');
+    } else {
+      await ctx.orm.user.create({
+        firstName, lastName, phone, email, password,
+      });
+      ctx.status = 201;
+    }
   } catch (ValidationError) {
     ctx.status = ValidationError.status;
   }
@@ -88,10 +93,15 @@ router.post('users.register.tramiter', '/register/tramiter', async (ctx) => {
     const {
       firstName, lastName, phone, email, password, city, commune,
     } = ctx.request.body;
-    await ctx.orm.tramiter.create({
-      firstName, lastName, phone, email, password, city, commune,
-    });
-    ctx.status = 201;
+    const tramiter = await ctx.orm.tramiter.findOne({ where: { email } });
+    if (tramiter) {
+      ctx.throw(401, 'Email ya esta siendo utilizado');
+    } else {
+      await ctx.orm.tramiter.create({
+        firstName, lastName, phone, email, password, city, commune,
+      });
+      ctx.status = 201;
+    }
   } catch (ValidationError) {
     ctx.status = ValidationError.status;
   }

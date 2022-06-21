@@ -257,4 +257,27 @@ router.patch('procedures.patch.advance', '/advance/:id', async (ctx) => {
   }
 });
 
+router.patch('procedures.patch.cancel', '/cancel/:id', async (ctx) => {
+  try {
+    const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
+    if (procedure) {
+      console.log(procedure.status, 1, ctx.state.currentTramiter, procedure.tramiterId);
+      if (procedure.status <= 1 && ctx.state.currentTramiter.id === procedure.tramiterId) {
+        await procedure.update({ tramiterId: null });
+        ctx.body = { success: true };
+        ctx.status = 200;
+      } else {
+        ctx.throw(401);
+      }
+    } else {
+      ctx.throw(404);
+    }
+  } catch (ValidationError) {
+    ctx.body = {
+      success: false,
+    };
+    ctx.status = ValidationError.status;
+  }
+});
+
 module.exports = router;
