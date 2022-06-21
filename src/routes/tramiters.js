@@ -65,7 +65,7 @@ router.patch('tramiters.patch', '/:id', async (ctx) => {
 router.delete('api.tramiter.delete', '/:id', async (ctx) => {
   try {
     const tramiter = await ctx.orm.tramiter.findByPk(ctx.params.id);
-    if (Number(ctx.state.currentTramiter.id) === Number(ctx.params.id)) {
+    if (ctx.state.currentUser.admin) {
       if (tramiter) {
         await tramiter.destroy();
         ctx.body = { success: true };
