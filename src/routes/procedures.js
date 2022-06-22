@@ -31,6 +31,32 @@ router.get('procedures.show.one', '/:id', async (ctx) => {
   }
 });
 
+router.get('procedures.show.gain', '/gain/:id', async (ctx) => {
+  try {
+    const gain = await ctx.orm.gain.findOne({ where: { procedureId: ctx.params.id } });
+    if (!gain) {
+      ctx.throw(404);
+    } else {
+      ctx.body = gain;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.get('procedures.show.debt', '/debt/:id', async (ctx) => {
+  try {
+    const debt = await ctx.orm.debt.findOne({ where: { procedureId: ctx.params.id } });
+    if (!debt) {
+      ctx.throw(404);
+    } else {
+      ctx.body = debt;
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
 router.get('users.show.user.procedure', '/user/:uid', async (ctx) => {
   try {
     const procedures = await ctx.orm.procedure.findAll({
@@ -106,10 +132,10 @@ router.delete('procedure.delete', '/:id', async (ctx) => {
 router.post('procedures.post', '/', async (ctx) => {
   try {
     const {
-      userId, tramiterId, status, type, comments, price, rating,
+      userId, tramiterId, status, address, plate, comments, price, rating,
     } = ctx.request.body;
     await ctx.orm.procedure.create({
-      userId, tramiterId, status, type, comments, price, rating,
+      userId, tramiterId, status, comments, price, rating, address, plate,
     });
     ctx.status = 201;
   } catch (ValidationError) {
@@ -235,6 +261,46 @@ router.patch('procedures.rating', '/rating/:id', async (ctx) => {
     await tramiter.update({ rating: (total / count) });
     ctx.status = 200;
   } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.patch('procedures.patch.advance', '/advance/:id', async (ctx) => {
+  try {
+    const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
+    if (procedure) {
+      if (procedure.status < 2) {
+        await procedure.update({ status: procedure.status + 1 });
+        ctx.status = 200;
+      } else {
+        ctx.throw(400);
+      }
+    } else {
+      ctx.throw(404);
+    }
+  } catch (ValidationError) {
+    ctx.status = ValidationError.status;
+  }
+});
+
+router.patch('procedures.patch.cancel', '/cancel/:id', async (ctx) => {
+  try {
+    const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
+    if (procedure) {
+      if (procedure.status <= 1 && ctx.state.currentTramiter.id === procedure.tramiterId) {
+        await procedure.update({ tramiterId: null });
+        ctx.body = { success: true };
+        ctx.status = 200;
+      } else {
+        ctx.throw(401);
+      }
+    } else {
+      ctx.throw(404);
+    }
+  } catch (ValidationError) {
+    ctx.body = {
+      success: false,
+    };
     ctx.status = ValidationError.status;
   }
 });

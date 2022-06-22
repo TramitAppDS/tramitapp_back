@@ -23,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     // 0 = waiting, 1 = in progress, 2 = done, 3 = paid.
     status: DataTypes.INTEGER,
     // 0 = technical revision, 1 = circulation paper.
-    type: DataTypes.INTEGER,
+    plate: DataTypes.STRING,
+    address: DataTypes.STRING,
     comments: DataTypes.STRING,
     price: DataTypes.INTEGER,
     rating: DataTypes.FLOAT,

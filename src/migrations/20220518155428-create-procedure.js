@@ -24,10 +24,13 @@ module.exports = {
           key: 'id',
         },
       },
-      status: {
-        type: Sequelize.INTEGER,
+      address: {
+        type: Sequelize.STRING,
       },
-      type: {
+      plate: {
+        type: Sequelize.STRING,
+      },
+      status: {
         type: Sequelize.INTEGER,
       },
       comments: {
