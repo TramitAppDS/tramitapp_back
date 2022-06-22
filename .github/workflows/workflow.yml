@@ -1,4 +1,4 @@
-name: "Tramitapp CI/CD"
+name: "Tramitapp Back CI/CD"
 on:
   push:
     branches: [ main]
