@@ -18,6 +18,6 @@ jobs:
         id: deploy
         run: |
           aws deploy create-deployment \
-            --application-name seconda \
-            --deployment-group-name seconda \
+            --application-name Tramitapp-Back \
+            --deployment-group-name TramitappBackDeploy \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
