@@ -433,6 +433,110 @@ describe('tramiter API routes', () => {
     });
   });
 
+  describe('PATCH /tramiter/transfer_data/:id', () => {
+    const authorizedPatchTramiter = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .auth(auth.access_token, { type: 'bearer' })
+      .set('Content-type', 'application/json')
+      .send(body);
+    const unauthorizedPatchTramiter = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .set('Content-type', 'application/json')
+      .send(body);
+    const unauthorizedPatchTramiter2 = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .auth(auth3.access_token, { type: 'bearer' })
+      .set('Content-type', 'application/json')
+      .send(body);
+
+    const newTramiterData = {
+      bank: 'santander',
+      accountType: 'vista',
+      accountNumber: '000222444666',
+      rut: 0,
+    };
+
+    describe('tramiter data is invalid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(-1, newTramiterData);
+      });
+
+      test('responds with 500 (internal server error) status code', () => {
+        expect(response.status).toBe(500);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+    });
+
+    describe('tramiter data is valid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('PATCH request actually updates the given tramiter', async () => {
+        const { id } = app.context.state.currentTramiter;
+        const tramiterposteado = await app.context.orm.tramiter.findOne({ where: { id } });
+        expect(tramiterposteado.bank).toEqual('santander');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body).toEqual({ success: true });
+      });
+    });
+
+    describe('tramiter data is valid but request is unauthorized', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('tramiter is not being approved by admin', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter2(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 403 (forbidden) status code', () => {
+        expect(response.status).toBe(403);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body.success).toEqual(false);
+      });
+    });
+  });
+
   describe('DELETE /tramiters/:id', () => {
     let tramiter;
 
