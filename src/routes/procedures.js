@@ -161,8 +161,7 @@ router.patch('accept.procedure', '/accept/:id', async (ctx) => {
       await procedure.update({ tramiterId: ctx.state.currentTramiter.id });
       await procedure.update({ status: 1 });
       const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com ',
-        service: 'gmail',
+        host: 'smtp-mail.outlook.com',
         auth: {
           user: process.env.MAIL,
           pass: process.env.MAIL_PASSWORD,
@@ -212,8 +211,7 @@ router.patch('close.procedure', '/close/:id', async (ctx) => {
         status: 0,
       });
       const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com ',
-        service: 'gmail',
+        host: 'smtp-mail.outlook.com',
         auth: {
           user: process.env.MAIL,
           pass: process.env.MAIL_PASSWORD,
