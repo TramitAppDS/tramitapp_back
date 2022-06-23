@@ -107,7 +107,7 @@ describe('gain API routes', () => {
         response = await authorizedGetGains();
       });
 
-      test('responds with 404 (not found) status code', () => {
+      test('responds with 200 (ok) status code', () => {
         expect(response.status).toBe(200);
       });
     });

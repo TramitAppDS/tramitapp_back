@@ -239,14 +239,14 @@ describe('procedure API routes', () => {
     });
   });
 
-  describe('GET /procedures/tramiter/null', () => {
+  describe('GET /procedures/null/tramiter', () => {
     let response;
 
     const authorizedGetProcedure = () => request
-      .get('/procedures/tramiter/null')
+      .get('/procedures/null/tramiter')
       .auth(auth.access_token, { type: 'bearer' });
     const unauthorizedGetProcedure = () => request
-      .get('/procedures/tramiter/null');
+      .get('/procedures/null/tramiter');
 
     beforeAll(async () => {
       // procedure = await app.context.orm.procedure.create(procedureData2);
