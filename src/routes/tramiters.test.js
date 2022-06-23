@@ -13,7 +13,7 @@ describe('tramiter API routes', () => {
     firstName: 'charles',
     lastName: 'aranguiz',
     phone: '972672772',
-    approved: 0,
+    approved: 1,
     email: 'charlesaranguiz@gmail.com',
     password: 'Hola123',
     city: 'Santiago',
