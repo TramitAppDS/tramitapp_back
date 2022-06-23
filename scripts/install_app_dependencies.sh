@@ -1,5 +1,7 @@
 #!/bin/bash
+ls
 cd /tramitapp_back
+ls
 sudo apt-get update
 
 sudo amazon-linux-extras install docker #! ?
