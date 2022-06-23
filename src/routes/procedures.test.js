@@ -11,6 +11,7 @@ describe('procedure API routes', () => {
   let auth3;
   let tramiter;
   let tramiter2;
+  let procedure;
   app.context.state = {};
 
   const userFields = {
@@ -53,12 +54,37 @@ describe('procedure API routes', () => {
     rating: 5.0,
   };
 
+  const procedureFields2 = {
+    userId: 1,
+    tramiterId: 1,
+    status: 0,
+    type: 0,
+    comments: 'revision tecninca',
+    price: 4000,
+    rating: 5.0,
+  };
+
   beforeAll(async () => {
     await app.context.orm.sequelize.sync({ force: true });
     const user = await app.context.orm.user.create(userFields);
     tramiter = await app.context.orm.tramiter.create(tramiterFields);
     tramiter2 = await app.context.orm.tramiter.create(tramiterFields2);
-    await app.context.orm.procedure.create(procedureFields);
+    procedure = await app.context.orm.procedure.create(procedureFields);
+    await app.context.orm.procedure.create(procedureFields2);
+    const gainFields = {
+      procedureId: procedure.id,
+      date: Date.parse('2018-12-09'),
+      price: 5000,
+      status: 0,
+    };
+    const debtFields = {
+      procedureId: procedure.id,
+      date: Date.parse('2018-12-09'),
+      price: 5000,
+      status: 0,
+    };
+    await app.context.orm.gain.create(gainFields);
+    await app.context.orm.debt.create(debtFields);
 
     app.context.state.currentuser = user;
     app.context.state.currentTramiter = tramiter;
@@ -127,14 +153,13 @@ describe('procedure API routes', () => {
         response = await authorizedGetProcedures();
       });
 
-      test('responds with 404 (not found) status code', () => {
+      test('responds with 200 (ok) status code', () => {
         expect(response.status).toBe(200);
       });
     });
   });
 
   describe('GET /procedures/:id', () => {
-    let procedure;
     let response;
     const procedureData = {
       userId: 1,
@@ -191,6 +216,138 @@ describe('procedure API routes', () => {
     });
   });
 
+  describe('GET /procedures/gain/:id', () => {
+    let response;
+
+    const authorizedGetProcedure = (id) => request
+      .get(`/procedures/gain/${id}`)
+      .auth(auth.access_token, { type: 'bearer' });
+    const unauthorizedGetProcedure = (id) => request
+      .get(`/procedures/gain/${id}`);
+
+    describe('when passed id corresponds to an existing procedure', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(1);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a json body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+    });
+
+    describe('when passed id does not corresponds to an existing procedure', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(-1);
+      });
+
+      test('responds with 404 (not found) status code', () => {
+        expect(response.status).toBe(404);
+      });
+    });
+
+    describe('when request is unauthorized because user is not logged in', () => {
+      beforeAll(async () => {
+        response = await unauthorizedGetProcedure(app.context.state.currentuser.id);
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
+  describe('GET /procedures/debt/:id', () => {
+    let response;
+
+    const authorizedGetProcedure = (id) => request
+      .get(`/procedures/debt/${id}`)
+      .auth(auth.access_token, { type: 'bearer' });
+    const unauthorizedGetProcedure = (id) => request
+      .get(`/procedures/debt/${id}`);
+
+    describe('when passed id corresponds to an existing procedure', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(1);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a json body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+    });
+
+    describe('when passed id does not corresponds to an existing procedure', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(-1);
+      });
+
+      test('responds with 404 (not found) status code', () => {
+        expect(response.status).toBe(404);
+      });
+    });
+
+    describe('when request is unauthorized because user is not logged in', () => {
+      beforeAll(async () => {
+        response = await unauthorizedGetProcedure(app.context.state.currentuser.id);
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
+  describe('GET /procedures/tramiter/:uid', () => {
+    let response;
+
+    const authorizedGetProcedure = (uid) => request
+      .get(`/procedures/tramiter/${uid}`)
+      .auth(auth.access_token, { type: 'bearer' });
+    const unauthorizedGetProcedure = (uid) => request
+      .get(`/procedures/tramiter/${uid}`);
+
+    describe('when passed id corresponds to an existing procedure', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(1);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a json body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+    });
+
+    describe('when passed id does not corresponds to an existing tramiter', () => {
+      beforeAll(async () => {
+        response = await authorizedGetProcedure(-1);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+    });
+
+    describe('when request is unauthorized because user is not logged in', () => {
+      beforeAll(async () => {
+        response = await unauthorizedGetProcedure(app.context.state.currentuser.id);
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
   describe('GET /procedures/user/:uid', () => {
     let response;
 
@@ -220,10 +377,10 @@ describe('procedure API routes', () => {
 
     describe('when passed id does not corresponds to an existing user', () => {
       beforeAll(async () => {
-        response = await authorizedGetProcedure(app.context.state.currentuser.id * -1);
+        response = await authorizedGetProcedure(-1);
       });
 
-      test('responds with 404 (not found) status code', () => {
+      test('responds with 200 (ok) status code', () => {
         expect(response.status).toBe(200);
       });
     });
@@ -445,6 +602,184 @@ describe('procedure API routes', () => {
     });
   });
 
+  describe('PATCH /procedures/advance', () => {
+    let response;
+    const procedureData4 = {
+      userId: 1,
+      status: 0,
+      type: 0,
+      comments: 'revision tecninca avanzar',
+      price: 20000,
+      rating: 4.0,
+    };
+    const procedureData5 = {
+      userId: 1,
+      status: 2,
+      type: 0,
+      comments: 'revision tecninca avanzar 2',
+      price: 20000,
+      rating: 4.0,
+    };
+
+    const authorizedPatchProcedure = (id) => request
+      .patch(`/procedures/advance/${id}`)
+      .auth(auth.access_token, { type: 'bearer' });
+    const unauthorizedPatchProcedure = (id) => request
+      .patch(`/procedures/advance/${id}`);
+
+    describe('procedure data is valid', () => {
+      beforeAll(async () => {
+        const procedure4 = await app.context.orm.procedure.create(procedureData4);
+        response = await authorizedPatchProcedure(procedure4.id);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a text/plain type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response text returns created', () => {
+        expect(response.text).toEqual('OK');
+      });
+
+      test('patch request actually updates the given procedure', async () => {
+        const { comments } = procedureData4;
+        const procedurePatched = await app.context.orm.procedure.findOne({ where: { comments } });
+        expect(procedurePatched.status).toEqual(1);
+      });
+    });
+
+    describe('advance but its already in status = 2', () => {
+      beforeAll(async () => {
+        const procedure4 = await app.context.orm.procedure.create(procedureData5);
+        response = await authorizedPatchProcedure(procedure4.id);
+      });
+
+      test('responds with 400 (bad request) status code', () => {
+        expect(response.status).toBe(400);
+      });
+
+      test('responds with a JSON body type, esta malo', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response text returns created', () => {
+        expect(response.text).toEqual('Bad Request');
+      });
+    });
+
+    describe('procedure id is invalid', () => {
+      beforeAll(async () => {
+        response = await authorizedPatchProcedure(-1);
+      });
+
+      test('responds with 404 (not) status code', () => {
+        expect(response.status).toBe(404);
+      });
+    });
+
+    describe('author data is valid but request is unauthorized', () => {
+      test('responds with 401 status code', async () => {
+        const procedure6 = await app.context.orm.procedure.create(procedureData4);
+        response = await unauthorizedPatchProcedure(procedure6.id);
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
+  describe('PATCH /procedures/cancel', () => {
+    let response;
+    const procedureData7 = {
+      userId: 1,
+      tramiterId: 1,
+      status: 0,
+      type: 0,
+      comments: 'revision tecnica cancelar',
+      price: 20000,
+      rating: 4.0,
+    };
+    const procedureData8 = {
+      userId: 1,
+      tramiterId: 1,
+      status: 2,
+      type: 0,
+      comments: 'revision tecnica cancelar 2',
+      price: 20000,
+      rating: 4.0,
+    };
+
+    const authorizedPatchProcedure = (id) => request
+      .patch(`/procedures/cancel/${id}`)
+      .auth(auth.access_token, { type: 'bearer' });
+    const unauthorizedPatchProcedure = (id) => request
+      .patch(`/procedures/cancel/${id}`);
+
+    describe('procedure data is valid', () => {
+      beforeAll(async () => {
+        const procedure7 = await app.context.orm.procedure.create(procedureData7);
+        response = await authorizedPatchProcedure(procedure7.id);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a text/plain type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response text returns created', () => {
+        expect(response.body).toEqual({ success: true });
+      });
+
+      test('patch request actually updates the given procedure', async () => {
+        const { comments } = procedureData7;
+        const procedurePatched = await app.context.orm.procedure.findOne({ where: { comments } });
+        expect(procedurePatched.tramiterId).toEqual(null);
+      });
+    });
+
+    describe('advance but its already in status = 2', () => {
+      beforeAll(async () => {
+        const procedure8 = await app.context.orm.procedure.create(procedureData8);
+        response = await authorizedPatchProcedure(procedure8.id);
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response text returns success false', () => {
+        expect(response.body).toEqual({ success: false });
+      });
+    });
+
+    describe('procedure id is invalid', () => {
+      beforeAll(async () => {
+        response = await authorizedPatchProcedure(-1);
+      });
+
+      test('responds with 404 (not) status code', () => {
+        expect(response.status).toBe(404);
+      });
+    });
+
+    describe('author data is valid but request is unauthorized', () => {
+      test('responds with 401 status code', async () => {
+        const procedure9 = await app.context.orm.procedure.create(procedureData8);
+        response = await unauthorizedPatchProcedure(procedure9.id);
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
   describe('DELETE /procedures', () => {
     let response;
     const procedureData4 = {
@@ -618,7 +953,7 @@ describe('procedure API routes', () => {
     describe('procedure data is valid but there is no current tramiter', () => {
       beforeAll(async () => {
         app.context.state.currentTramiter = null;
-        const procedure = await app.context.orm.procedure.create(procedureData4);
+        procedure = await app.context.orm.procedure.create(procedureData4);
         response = await unauthorizedPatchProcedure2(procedure.id);
       });
 
