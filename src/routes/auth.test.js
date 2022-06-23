@@ -17,7 +17,7 @@ describe('auth API routes', () => {
     firstName: 'charles',
     lastName: 'aranguiz',
     phone: '972672772',
-    approved: 0,
+    approved: 1,
     email: 'charlesaranguiz@gmail.com',
     password: 'Hola123',
     city: 'Santiago',
@@ -31,19 +31,16 @@ describe('auth API routes', () => {
     email: 'julianalvarez@gmail.com',
     password: 'Hola123',
   };
-  // const userRegisterFields2 = {
-  // };
+
   const tramiterRegisterFields = {
     firstName: 'milton',
     lastName: 'casco',
     phone: '991471583',
-    email: 'julianalvarez@gmail.com',
+    email: 'miltoncasco@gmail.com',
     password: 'Hola123',
     city: 'Santiago',
     commune: 'Maria Pinto',
   };
-  // const tramiterRegisterFields2 = {
-  // };
 
   beforeAll(async () => {
     await app.context.orm.sequelize.sync({ force: true });
@@ -201,7 +198,7 @@ describe('auth API routes', () => {
         response = await posttramiter();
       });
 
-      test('responds with 500 (error) status code', () => {
+      test('responds with 500 (internal error) status code', () => {
         expect(response.status).toBe(500);
       });
     });
@@ -211,14 +208,16 @@ describe('auth API routes', () => {
     describe('user data is valid', () => {
       let response;
 
-      const authorizedPostAuthor = () => request
-        .post('/auth/register/user');
+      const authorizedPostAuthor = (body) => request
+        .post('/auth/register/user')
+        .set('Content-type', 'application/json')
+        .send(body);
 
       beforeAll(async () => {
         response = await authorizedPostAuthor(userRegisterFields);
       });
 
-      test('responds with 200 (ok) status code', () => {
+      test('responds with 201 (created) status code', () => {
         expect(response.status).toBe(201);
       });
 
@@ -234,15 +233,17 @@ describe('auth API routes', () => {
     describe('missing data in user', () => {
       let response;
 
-      const authorizedPostAuthor = () => request
-        .post('/auth/register/user');
+      const authorizedPostAuthor = (body) => request
+        .post('/auth/register/user')
+        .set('Content-type', 'application/json')
+        .send(body);
 
       beforeAll(async () => {
         response = await authorizedPostAuthor();
       });
 
-      test('responds with 200 (ok) status code', () => {
-        expect(response.status).toBe(201);
+      test('responds with 500 (internal error) status code', () => {
+        expect(response.status).toBe(500);
       });
 
       test('responds with a json body type', () => {
@@ -250,7 +251,7 @@ describe('auth API routes', () => {
       });
 
       test('response text sends created', () => {
-        expect(response.text).toEqual('Created');
+        expect(response.text).toEqual('Internal Server Error');
       });
     });
   });
@@ -259,14 +260,16 @@ describe('auth API routes', () => {
     describe('tramiter data is valid', () => {
       let response;
 
-      const authorizedPostAuthor = () => request
-        .post('/auth/register/tramiter');
+      const authorizedPostAuthor = (body) => request
+        .post('/auth/register/tramiter')
+        .set('Content-type', 'application/json')
+        .send(body);
 
       beforeAll(async () => {
         response = await authorizedPostAuthor(tramiterRegisterFields);
       });
 
-      test('responds with 200 (ok) status code', () => {
+      test('responds with 201 (created) status code', () => {
         expect(response.status).toBe(201);
       });
 
@@ -282,15 +285,17 @@ describe('auth API routes', () => {
     describe('missing data in tramiter', () => {
       let response;
 
-      const authorizedPostAuthor = () => request
-        .post('/auth/register/tramiter');
+      const authorizedPostAuthor = (body) => request
+        .post('/auth/register/tramiter')
+        .set('Content-type', 'application/json')
+        .send(body);
 
       beforeAll(async () => {
         response = await authorizedPostAuthor();
       });
 
-      test('responds with 200 (ok) status code', () => {
-        expect(response.status).toBe(201);
+      test('responds with 500 (internal error) status code', () => {
+        expect(response.status).toBe(500);
       });
 
       test('responds with a json body type', () => {
@@ -298,7 +303,7 @@ describe('auth API routes', () => {
       });
 
       test('response text sends created', () => {
-        expect(response.text).toEqual('Created');
+        expect(response.text).toEqual('Internal Server Error');
       });
     });
   });
