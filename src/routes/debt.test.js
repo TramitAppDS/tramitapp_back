@@ -7,6 +7,7 @@ const request = supertest(app.callback());
 
 describe('debt API routes', () => {
   let auth;
+  let auth2;
   app.context.state = {};
   const userFields = {
     firstName: 'ben',
@@ -17,11 +18,29 @@ describe('debt API routes', () => {
     password: 'Hola123',
   };
 
-  // const localFields = {
-  //   name: 'vamos la roja',
-  //   capacity: 100,
-  //   userId: 1,
-  // };
+  const tramiterFields = {
+    firstName: 'charles',
+    lastName: 'aranguiz',
+    phone: '972672772',
+    approved: 1,
+    email: 'charlesaranguiz@gmail.com',
+    password: 'Hola123',
+    city: 'Santiago',
+    commune: 'Puente Alto',
+    rating: 5.0,
+  };
+
+  const tramiterFields2 = {
+    firstName: 'erick',
+    lastName: 'pulgar',
+    phone: '972672752',
+    approved: 1,
+    email: 'erickpulgar@gmail.com',
+    password: 'Hola123',
+    city: 'Santiago',
+    commune: 'Puente Alto',
+    rating: 5.0,
+  };
 
   const debtFields = {
     procedureId: 1,
@@ -43,15 +62,25 @@ describe('debt API routes', () => {
   beforeAll(async () => {
     await app.context.orm.sequelize.sync({ force: true });
     const user = await app.context.orm.user.create(userFields);
+    const tramiter = await app.context.orm.tramiter.create(tramiterFields);
+    await app.context.orm.tramiter.create(tramiterFields2);
     await app.context.orm.procedure.create(procedureFields);
     await app.context.orm.debt.create(debtFields);
 
     app.context.state.currentUser = user;
+    app.context.state.currentTramiter = tramiter;
+
     const authResponse = await request
       .post('/auth/login/user')
       .set('Content-type', 'application/json')
       .send({ email: userFields.email, password: userFields.password });
     auth = authResponse.body;
+
+    const authResponse2 = await request
+      .post('/auth/login/tramiter')
+      .set('Content-type', 'application/json')
+      .send({ email: tramiterFields.email, password: tramiterFields.password });
+    auth2 = authResponse2.body;
   });
 
   afterAll(async () => {
@@ -102,7 +131,7 @@ describe('debt API routes', () => {
         response = await authorizedGetDebts();
       });
 
-      test('responds with 404 (not found) status code', () => {
+      test('responds with 200 (ok) status code', () => {
         expect(response.status).toBe(200);
       });
     });
@@ -391,6 +420,160 @@ describe('debt API routes', () => {
 
       beforeAll(async () => {
         response = await unauthorizedDeleteDebt(debt.id);
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+  });
+
+  describe('PATCH /debts/procedure/:pid', () => {
+    let procedure;
+    let procedure2;
+    let procedure3;
+
+    const procedureData4 = {
+      tramiterId: 1,
+      status: 0,
+      type: 0,
+      comments: 'revision tecninca',
+      price: 2000,
+      rating: 5.0,
+    };
+
+    const procedureData5 = {
+      tramiterId: 2,
+      status: 0,
+      type: 0,
+      comments: 'revision tecninca',
+      price: 2000,
+      rating: 5.0,
+    };
+
+    const procedureData6 = {
+      tramiterId: 2,
+      status: 0,
+      type: 0,
+      comments: 'revision tecninca',
+      price: 2000,
+      rating: 5.0,
+    };
+
+    const authorizedPatchLocal = (pid) => request
+      .patch(`/debts/procedure/${pid}`)
+      .auth(auth2.access_token, { type: 'bearer' });
+    const unauthorizedPatchLocal = (pid) => request
+      .patch(`/debts/procedure/${pid}`);
+    beforeAll(async () => {
+      procedure = await app.context.orm.procedure.create(procedureData4);
+      procedure2 = await app.context.orm.procedure.create(procedureData5);
+      procedure3 = await app.context.orm.procedure.create(procedureData6);
+
+      const debtData4 = {
+        procedureId: procedure.id,
+        date: Date.parse('2022-05-29'),
+        price: 202020,
+        status: 0,
+      };
+      const debtData5 = {
+        procedureId: procedure2.id,
+        date: Date.parse('2022-05-29'),
+        price: 2020201,
+        status: 0,
+      };
+
+      await app.context.orm.debt.create(debtData4);
+      await app.context.orm.debt.create(debtData5);
+
+      const gainData4 = {
+        procedureId: procedure.id,
+        date: Date.parse('2022-05-29'),
+        price: 1234567,
+        status: 1,
+      };
+      const gainData5 = {
+        procedureId: procedure2.id,
+        date: Date.parse('2022-05-29'),
+        price: 12345678,
+        status: 1,
+      };
+
+      await app.context.orm.gain.create(gainData4);
+      await app.context.orm.gain.create(gainData5);
+    });
+
+    describe('debt data is valid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchLocal(procedure.id);
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a text/plain body type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('PATCH request actually updates the given local', async () => {
+        // const { price } = debtData4;
+        const debtposteado = await app.context.orm.debt.findOne({ where: { price: 202020 } });
+        expect(debtposteado.status).toEqual(1);
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.text).toEqual('OK');
+      });
+    });
+
+    describe('debt data is valid but different tramiter', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchLocal(procedure2.id);
+      });
+
+      test('responds with 404 (Unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+
+      test('responds with a text/plain body type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.text).toEqual('Unauthorized');
+      });
+    });
+
+    describe('procedure data is valid but no debt and gain associated', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchLocal(procedure3.id);
+      });
+
+      test('responds with 404 (Not found) status code', () => {
+        expect(response.status).toBe(404);
+      });
+
+      test('responds with a text/plain body type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.text).toEqual('Not Found');
+      });
+    });
+
+    describe('author data is valid but request is unauthorized', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchLocal(procedure.id);
       });
 
       test('responds with 401 (unauthorized) status code', () => {
