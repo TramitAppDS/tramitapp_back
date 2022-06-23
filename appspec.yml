@@ -5,6 +5,7 @@ files:
    destination: /tramitapp_back
 hooks:
   AfterInstall:
+   - location: scripts/change_permissions.sh
    - location: scripts/install_app_dependencies.sh
      timeout: 300
      runas: root
