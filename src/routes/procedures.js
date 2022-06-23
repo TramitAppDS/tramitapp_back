@@ -258,7 +258,7 @@ router.patch('procedures.rating', '/rating/:id', async (ctx) => {
     let count = 0;
     let total = 0;
     tramiter.procedures.forEach((e) => {
-      if (e.status === 3){
+      if (e.status === 3) {
         count += 1;
         total += e.rating;
       }
