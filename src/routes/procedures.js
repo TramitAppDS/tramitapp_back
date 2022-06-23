@@ -65,6 +65,7 @@ router.get('users.show.user.procedure', '/user/:uid', async (ctx) => {
     if (!procedures) {
       ctx.throw(404);
     } else {
+      procedures.sort((a, b) => (a.dataValues.status - b.dataValues.status));
       ctx.body = procedures;
     }
   } catch (ValidationError) {
@@ -121,8 +122,12 @@ router.patch('procedures.patch', '/:id', async (ctx) => {
 router.delete('procedure.delete', '/:id', async (ctx) => {
   try {
     const procedure = await ctx.orm.procedure.findByPk(ctx.params.id);
-    await procedure.destroy();
-    ctx.body = { success: true };
+    if (procedure.status === 0) {
+      await procedure.destroy();
+      ctx.body = { success: true };
+    } else {
+      ctx.status = 401;
+    }
   } catch (ValidationError) {
     ctx.status = ValidationError.status;
     ctx.body = { success: false };
@@ -288,7 +293,7 @@ router.patch('procedures.patch.cancel', '/cancel/:id', async (ctx) => {
     const procedure = await ctx.orm.procedure.findByPk(Number(ctx.params.id));
     if (procedure) {
       if (procedure.status <= 1 && ctx.state.currentTramiter.id === procedure.tramiterId) {
-        await procedure.update({ tramiterId: null });
+        await procedure.update({ tramiterId: null, status: 0 });
         ctx.body = { success: true };
         ctx.status = 200;
       } else {
