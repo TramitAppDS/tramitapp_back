@@ -26,7 +26,9 @@ router.get('tramiters.show.one', '/:id', async (ctx) => {
   try {
     const tramiter = await ctx.orm.tramiter.findByPk(
       ctx.params.id,
-      { attributes: ['firstName', 'lastName', 'email', 'approved', 'phone', 'commune', 'city'] },
+      {
+        attributes: { exclude: ['password'] },
+      },
     );
     if (!tramiter) {
       ctx.throw(404);
