@@ -85,6 +85,7 @@ router.post('users.register.user', '/register/user', async (ctx) => {
     }
   } catch (ValidationError) {
     ctx.status = ValidationError.status;
+    ctx.body = ValidationError.message;
   }
 });
 
@@ -103,6 +104,7 @@ router.post('users.register.tramiter', '/register/tramiter', async (ctx) => {
       ctx.status = 201;
     }
   } catch (ValidationError) {
+    ctx.body = ValidationError.message;
     ctx.status = ValidationError.status;
   }
 });
