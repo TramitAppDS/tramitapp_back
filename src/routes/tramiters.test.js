@@ -7,13 +7,15 @@ const request = supertest(app.callback());
 
 describe('tramiter API routes', () => {
   let auth;
+  let auth2;
+  let auth3;
   app.context.state = {};
 
   const tramiterFields = {
     firstName: 'charles',
     lastName: 'aranguiz',
     phone: '972672772',
-    approved: 0,
+    approved: 1,
     email: 'charlesaranguiz@gmail.com',
     password: 'Hola123',
     city: 'Santiago',
@@ -21,16 +23,50 @@ describe('tramiter API routes', () => {
     rating: 4.0,
   };
 
+  const userFields = {
+    firstName: 'erick',
+    lastName: 'pulgar',
+    phone: '972872772',
+    admin: true,
+    email: 'erickpulgar@gmail.com',
+    password: 'Hola123',
+  };
+
+  const userFields2 = {
+    firstName: 'humberto',
+    lastName: 'suazo',
+    phone: '974872772',
+    admin: false,
+    email: 'humbertosuazo@gmail.com',
+    password: 'Hola123',
+  };
+
   beforeAll(async () => {
     await app.context.orm.sequelize.sync({ force: true });
     const tramiter = await app.context.orm.tramiter.create(tramiterFields);
+    const user = await app.context.orm.user.create(userFields);
+    await app.context.orm.user.create(userFields2);
 
     app.context.state.currentTramiter = tramiter;
+    app.context.state.currentUser = user;
+
     const authResponse = await request
       .post('/auth/login/tramiter')
       .set('Content-type', 'application/json')
       .send({ email: tramiterFields.email, password: tramiterFields.password });
     auth = authResponse.body;
+
+    const authResponse2 = await request
+      .post('/auth/login/user')
+      .set('Content-type', 'application/json')
+      .send({ email: userFields.email, password: userFields.password });
+    auth2 = authResponse2.body;
+
+    const authResponse3 = await request
+      .post('/auth/login/user')
+      .set('Content-type', 'application/json')
+      .send({ email: userFields2.email, password: userFields2.password });
+    auth3 = authResponse3.body;
   });
 
   afterAll(async () => {
@@ -302,22 +338,225 @@ describe('tramiter API routes', () => {
     });
   });
 
+  describe('PATCH /tramiter/admin/approve/:tid', () => {
+    const authorizedPatchTramiter = (tid) => request
+      .patch(`/tramiters/admin/approve/${tid}`)
+      .auth(auth2.access_token, { type: 'bearer' });
+    const unauthorizedPatchTramiter = (tid) => request
+      .patch(`/tramiters/admin/approve/${tid}`);
+    const unauthorizedPatchTramiter2 = (tid) => request
+      .patch(`/tramiters/admin/approve/${tid}`)
+      .auth(auth3.access_token, { type: 'bearer' });
+
+    describe('tramiter data is invalid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(-1);
+      });
+
+      test('responds with 404 (not found) status code', () => {
+        expect(response.status).toBe(404);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body).toEqual({ success: false });
+      });
+    });
+
+    describe('tramiter data is valid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(
+          app.context.state.currentTramiter.id,
+        );
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('PATCH request actually updates the given tramiter', async () => {
+        const { id } = app.context.state.currentTramiter;
+        const tramiterposteado = await app.context.orm.tramiter.findOne({ where: { id } });
+        expect(tramiterposteado.approved).toEqual(true);
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body).toEqual({ success: true });
+      });
+    });
+
+    describe('tramiter data is valid but request is unauthorized', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter(
+          app.context.state.currentTramiter.id,
+        );
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('tramiter is not being approved by admin', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter2(
+          app.context.state.currentTramiter.id,
+        );
+      });
+
+      test('responds with 403 (forbidden) status code', () => {
+        expect(response.status).toBe(403);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body.success).toEqual(false);
+      });
+    });
+  });
+
+  describe('PATCH /tramiter/transfer_data/:id', () => {
+    const authorizedPatchTramiter = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .auth(auth.access_token, { type: 'bearer' })
+      .set('Content-type', 'application/json')
+      .send(body);
+    const unauthorizedPatchTramiter = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .set('Content-type', 'application/json')
+      .send(body);
+    const unauthorizedPatchTramiter2 = (id, body) => request
+      .patch(`/tramiters/transfer_data/${id}`)
+      .auth(auth3.access_token, { type: 'bearer' })
+      .set('Content-type', 'application/json')
+      .send(body);
+
+    const newTramiterData = {
+      bank: 'santander',
+      accountType: 'vista',
+      accountNumber: '000222444666',
+      rut: 0,
+    };
+
+    describe('tramiter data is invalid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(-1, newTramiterData);
+      });
+
+      test('responds with 500 (internal server error) status code', () => {
+        expect(response.status).toBe(500);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('text/plain');
+      });
+    });
+
+    describe('tramiter data is valid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedPatchTramiter(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 200 (ok) status code', () => {
+        expect(response.status).toBe(200);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('PATCH request actually updates the given tramiter', async () => {
+        const { id } = app.context.state.currentTramiter;
+        const tramiterposteado = await app.context.orm.tramiter.findOne({ where: { id } });
+        expect(tramiterposteado.bank).toEqual('santander');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body).toEqual({ success: true });
+      });
+    });
+
+    describe('tramiter data is valid but request is unauthorized', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 401 (unauthorized) status code', () => {
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('tramiter is not being approved by admin', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await unauthorizedPatchTramiter2(
+          app.context.state.currentTramiter.id, newTramiterData,
+        );
+      });
+
+      test('responds with 403 (forbidden) status code', () => {
+        expect(response.status).toBe(403);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response body matches returns success true', () => {
+        expect(response.body.success).toEqual(false);
+      });
+    });
+  });
+
   describe('DELETE /tramiters/:id', () => {
     let tramiter;
 
     const authorizedDeleteTramiter = (id) => request
       .delete(`/tramiters/${id}`)
-      .auth(auth.access_token, { type: 'bearer' });
+      .auth(auth2.access_token, { type: 'bearer' });
 
     const unauthorizedDeleteTramiter = (id) => request
       .delete(`/tramiters/${id}`);
+
+    const unauthorizedDeleteTramiter2 = (id) => request
+      .delete(`/tramiters/${id}`)
+      .auth(auth3.access_token, { type: 'bearer' });
 
     beforeAll(async () => {
       const { id } = app.context.state.currentTramiter;
       tramiter = await app.context.orm.tramiter.findOne({ where: { id } });
     });
 
-    describe('tramiter to delete is not current user', () => {
+    describe('trying to delete tramiter not being the admin', () => {
       let response;
       const tramiterFields3 = {
         firstName: 'paulo',
@@ -333,7 +572,7 @@ describe('tramiter API routes', () => {
 
       beforeAll(async () => {
         const tramiter2 = await app.context.orm.tramiter.create(tramiterFields3);
-        response = await authorizedDeleteTramiter(tramiter2.id);
+        response = await unauthorizedDeleteTramiter2(tramiter2.id);
       });
 
       test('responds with 403 (error) status code', () => {
@@ -345,6 +584,26 @@ describe('tramiter API routes', () => {
       });
 
       test('response body returns success true', () => {
+        expect(response.body).toEqual({ success: false });
+      });
+    });
+
+    describe('tramiter data is invalid', () => {
+      let response;
+
+      beforeAll(async () => {
+        response = await authorizedDeleteTramiter(-1);
+      });
+
+      test('responds with 404 (not found) status code', () => {
+        expect(response.status).toBe(404);
+      });
+
+      test('responds with a JSON body type', () => {
+        expect(response.type).toEqual('application/json');
+      });
+
+      test('response body returns success false', () => {
         expect(response.body).toEqual({ success: false });
       });
     });

@@ -171,8 +171,8 @@ router.patch('accept.procedure', '/accept/:id', async (ctx) => {
       const mailOptions = {
         from: process.env.MAIL,
         to: user.email,
-        subject: 'Mail de tramite aceptado',
-        text: `Su tramite ha sido aceptado y esta siendo realizado por ${ctx.state.currentTramiter.firstName}.`,
+        subject: '¡Trámite aceptado!',
+        text: `Su trámite ha sido aceptado y está siendo realizado por ${ctx.state.currentTramiter.firstName}.`,
       };
       transporter.sendMail(mailOptions);
       ctx.body = { success: true };
@@ -221,8 +221,8 @@ router.patch('close.procedure', '/close/:id', async (ctx) => {
       const mailOptions = {
         from: process.env.MAIL,
         to: user.email,
-        subject: 'Mail de tramite terminado',
-        text: `Su tramite que estaba siendo realizado por ${tramiter.firstName} ha sido terminado, por favor proceda a pagar.`,
+        subject: '¡Trámite terminado!',
+        text: `Su trámite que estaba siendo realizado por ${tramiter.firstName} ha sido terminado, por favor proceda a pagar.`,
       };
       transporter.sendMail(mailOptions);
       ctx.body = { success: true };
@@ -258,8 +258,10 @@ router.patch('procedures.rating', '/rating/:id', async (ctx) => {
     let count = 0;
     let total = 0;
     tramiter.procedures.forEach((e) => {
-      count += 1;
-      total += e.rating;
+      if (e.status === 3) {
+        count += 1;
+        total += e.rating;
+      }
     });
     await tramiter.update({ rating: (total / count) });
     ctx.status = 200;
